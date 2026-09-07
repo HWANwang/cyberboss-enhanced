@@ -1,0 +1,28 @@
+cyberboss-agent
+node_modules/
+
+# Local identity, credentials, and runtime state
+.env
+.env.*
+!.env.example
+state/
+private/
+.codex/
+
+# Runtime output and local tooling
+tmp/
+logs/
+*.log
+*.pid
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+*.local
+nul
+
+# Generated artifacts and private demos
+coverage/
+timeline-full-test.png
+docs/images/private/
+*.screenshot.png

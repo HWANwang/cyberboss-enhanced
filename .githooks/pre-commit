@@ -1,0 +1,2 @@
+#!/bin/sh
+node scripts/publication-audit.js --staged
