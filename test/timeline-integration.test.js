@@ -128,4 +128,3 @@ test("timeline failure message prefers the root error over stack tail", () => {
   assert.match(message, /Invalid timeline event at index 1: title is missing and eventNodeId cannot backfill it/);
   assert.doesNotMatch(message, /withTimelineWriteLock/);
 });
-

@@ -4,11 +4,11 @@
 
 Cyberboss connects a locally running Codex or Claude Code runtime to WeChat. It keeps user data local and provides reminders, task supervision, diary and timeline tooling, file delivery, and background check-ins.
 
-This repository is a privacy-safe engineering fork of [WenXiaoWendy/cyberboss](https://github.com/WenXiaoWendy/cyberboss). It retains the upstream license and attribution while documenting the additional reliability work in this checkout.
+This repository is a privacy-safe, independent derivative of [WenXiaoWendy/cyberboss](https://github.com/WenXiaoWendy/cyberboss). It retains the upstream license and attribution while documenting the additional reliability work in this checkout. It has a separate publication history and is not a GitHub network fork; see [NOTICE](./NOTICE).
 
-## Why this fork exists
+## Why this derivative exists
 
-The upstream project establishes the local-first WeChat bridge, runtime adapters, timeline integration, reminders, diary support, and check-ins. This fork focuses on the failures that appear after an agent is used continuously: replies reaching the wrong account, duplicated messages after restarts, reminders that fire but never reach WeChat, stale task checks, and runtime-host changes that break local tools.
+The upstream project establishes the local-first WeChat bridge, runtime adapters, timeline integration, reminders, diary support, and check-ins. This derivative focuses on the failures that appear after an agent is used continuously: replies reaching the wrong account, duplicated messages after restarts, reminders that fire but never reach WeChat, stale task checks, and runtime-host changes that break local tools.
 
 ## Engineering highlights
 
@@ -125,4 +125,4 @@ git config cyberboss.publicSync true
 
 ## Attribution and license
 
-Based on [WenXiaoWendy/cyberboss](https://github.com/WenXiaoWendy/cyberboss). The upstream project and this derivative are licensed under [AGPL-3.0-only](./LICENSE). Modifications in this repository are documented in the Git history and this README. When offering a modified version over a network, provide the corresponding source as required by the AGPL.
+Based on [WenXiaoWendy/cyberboss](https://github.com/WenXiaoWendy/cyberboss). The upstream project and this derivative are licensed under [AGPL-3.0-only](./LICENSE). Beyond preserving the license, this repository records the upstream source, modification date, and major modification categories in [NOTICE](./NOTICE). The public `main` branch is the corresponding source for the release it contains. When offering a modified version over a network, make that exact source URL clearly available to remote users, as required by the AGPL.

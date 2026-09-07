@@ -1586,4 +1586,3 @@ async function waitForFileText(filePath, pattern, timeoutMs = 1000) {
   }
   return fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf8") : "";
 }
-

@@ -21,6 +21,17 @@ function config(name, fallback = "") {
   }
 }
 
+function runNpm(args) {
+  const command = process.platform === "win32" ? "npm.cmd" : "npm";
+  childProcess.execFileSync(command, args, {
+    cwd: root,
+    stdio: "inherit",
+    // Windows executes .cmd shims through cmd.exe; execFileSync cannot launch
+    // them directly and otherwise fails with EINVAL from a Git hook.
+    shell: process.platform === "win32",
+  });
+}
+
 try {
   if (config("cyberboss.publicSync") !== "true") {
     process.exit(0);
@@ -31,15 +42,8 @@ try {
     process.stdout.write(`Public sync skipped: current branch is ${branch || "detached"}.\n`);
     process.exit(0);
   }
-  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-  childProcess.execFileSync(npmCommand, ["run", "check"], {
-    cwd: root,
-    stdio: "inherit",
-  });
-  childProcess.execFileSync(npmCommand, ["test"], {
-    cwd: root,
-    stdio: "inherit",
-  });
+  runNpm(["run", "check"]);
+  runNpm(["test"]);
   const localBranch = config("cyberboss.publicLocalBranch", "public-main");
   childProcess.execFileSync(process.execPath, [
     path.join(root, "scripts", "update-public-branch.js"),

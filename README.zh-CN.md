@@ -4,7 +4,7 @@
 
 Cyberboss 将本机运行的 Codex 或 Claude Code 接入微信，并提供提醒、任务监督、日记、时间线、文件发送和后台 check-in。所有用户数据默认保留在本地。
 
-本仓库基于 [WenXiaoWendy/cyberboss](https://github.com/WenXiaoWendy/cyberboss) 进行工程化增强，保留上游署名与许可证。本 fork 的重点不是重新包装原有功能，而是解决持续真实使用后出现的投递、状态与恢复问题。
+本仓库是基于 [WenXiaoWendy/cyberboss](https://github.com/WenXiaoWendy/cyberboss) 的、经过隐私脱敏的独立衍生版本，保留上游署名与许可证。它使用独立的公开历史，并非 GitHub 网络意义上的 Fork；详见 [NOTICE](./NOTICE)。其重点不是重新包装原有功能，而是解决持续真实使用后出现的投递、状态与恢复问题。
 
 ## 相对上游的工程改进
 
@@ -116,4 +116,4 @@ git config cyberboss.publicSync true
 
 ## 署名与许可证
 
-基于 [WenXiaoWendy/cyberboss](https://github.com/WenXiaoWendy/cyberboss)。上游和本衍生项目均使用 [AGPL-3.0-only](./LICENSE)。如通过网络提供修改后的版本，请依照 AGPL 提供相应源代码。
+基于 [WenXiaoWendy/cyberboss](https://github.com/WenXiaoWendy/cyberboss)。除保留 [LICENSE](./LICENSE) 外，本仓库还在 [NOTICE](./NOTICE) 中记录上游来源、修改日期和主要改动类别。公开 `main` 分支是其所含发布版本的对应源码；如通过网络提供修改后的版本，应向远程用户清晰提供该部署版本的源码链接，以满足 AGPL 要求。

@@ -1,0 +1,21 @@
+Cyberboss Enhanced — upstream attribution and modification notice
+
+This repository is an independent derivative of Cyberboss:
+https://github.com/WenXiaoWendy/cyberboss
+
+It is not a GitHub network fork. It has a separate, privacy-sanitized
+publication history so that source code can be shared without publishing
+runtime accounts, conversations, personal records, or local credentials.
+
+This modified version was first publicly released on 2026-09-07. Its
+substantive changes include reliable WeChat outbound delivery, persistent
+background-event routing, reminder and task reconciliation, runtime recovery,
+privacy-safe configuration loading, and publication-safety tooling.
+
+The upstream project attribution and applicable notices are retained in this
+repository. This derivative is distributed under the GNU Affero General Public
+License, version 3 only; see LICENSE.
+
+Network deployments of a modified version should give remote users a clear,
+no-charge path to the Corresponding Source for the exact deployed version, as
+required by section 13 of the AGPL-3.0.
