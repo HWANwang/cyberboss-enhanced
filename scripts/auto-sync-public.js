@@ -22,14 +22,18 @@ function config(name, fallback = "") {
 }
 
 function runNpm(args) {
-  const command = process.platform === "win32" ? "npm.cmd" : "npm";
-  childProcess.execFileSync(command, args, {
-    cwd: root,
-    stdio: "inherit",
+  if (process.platform === "win32") {
     // Windows executes .cmd shims through cmd.exe; execFileSync cannot launch
     // them directly and otherwise fails with EINVAL from a Git hook.
-    shell: process.platform === "win32",
-  });
+    childProcess.execFileSync(process.env.ComSpec || "cmd.exe", [
+      "/d",
+      "/s",
+      "/c",
+      `npm.cmd ${args.join(" ")}`,
+    ], { cwd: root, stdio: "inherit" });
+    return;
+  }
+  childProcess.execFileSync("npm", args, { cwd: root, stdio: "inherit" });
 }
 
 try {
