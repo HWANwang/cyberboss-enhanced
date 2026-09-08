@@ -4,6 +4,7 @@ const fs = require("fs/promises");
 
 const { getUploadUrl, sendMessage } = require("./api");
 const { getMimeFromFilename } = require("./media-mime");
+const { createWeixinNetworkError } = require("./network-error");
 
 const WEIXIN_MEDIA_TYPE = {
   IMAGE: 1,
@@ -31,11 +32,22 @@ function buildCdnUploadUrl({ cdnBaseUrl, uploadFullUrl, uploadParam, filekey }) 
 async function uploadBufferToCdn({ buf, uploadFullUrl, uploadParam, filekey, cdnBaseUrl, aeskey }) {
   const ciphertext = encryptAesEcb(buf, aeskey);
   const cdnUrl = buildCdnUploadUrl({ cdnBaseUrl, uploadFullUrl, uploadParam, filekey });
-  const response = await fetch(cdnUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/octet-stream" },
-    body: new Uint8Array(ciphertext),
-  });
+  const startedAt = Date.now();
+  let response;
+  try {
+    response = await fetch(cdnUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/octet-stream" },
+      body: new Uint8Array(ciphertext),
+    });
+  } catch (error) {
+    throw createWeixinNetworkError(error, {
+      operation: "cdnUpload",
+      phase: "request",
+      url: cdnUrl,
+      elapsedMs: Date.now() - startedAt,
+    });
+  }
   if (response.status !== 200) {
     const errMsg = response.headers.get("x-error-message") || await response.text();
     throw new Error(`CDN upload failed: ${errMsg || response.status}`);

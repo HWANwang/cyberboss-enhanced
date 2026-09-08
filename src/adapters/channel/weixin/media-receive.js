@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const fs = require("fs/promises");
 const path = require("path");
+const { createWeixinNetworkError } = require("./network-error");
 
 const DEFAULT_INBOX_DIR = "inbox";
 const MAX_FILE_NAME_LENGTH = 120;
@@ -87,6 +88,7 @@ async function downloadAttachmentPayload(attachment, cdnBaseUrl) {
 
   let lastError = null;
   for (const candidate of candidates) {
+    const startedAt = Date.now();
     try {
       const response = await fetch(candidate, {
         method: "GET",
@@ -105,7 +107,14 @@ async function downloadAttachmentPayload(attachment, cdnBaseUrl) {
         contentType: normalizeContentType(response.headers.get("content-type")),
       };
     } catch (error) {
-      lastError = error;
+      lastError = error?.name === "WeixinNetworkError"
+        ? error
+        : createWeixinNetworkError(error, {
+          operation: "cdnDownload",
+          phase: "request_or_body",
+          url: candidate,
+          elapsedMs: Date.now() - startedAt,
+        });
     }
   }
 

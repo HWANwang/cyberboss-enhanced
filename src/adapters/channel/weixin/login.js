@@ -6,6 +6,7 @@ const {
 } = require("./account-store");
 const { clearPersistedContextTokens } = require("./context-token-store");
 const { redactSensitiveText } = require("./redact");
+const { createWeixinNetworkError } = require("./network-error");
 
 const ACTIVE_LOGIN_TTL_MS = 5 * 60_000;
 const QR_LONG_POLL_TIMEOUT_MS = 35_000;
@@ -18,7 +19,18 @@ function ensureTrailingSlash(url) {
 async function fetchQrCode(apiBaseUrl, botType) {
   const base = ensureTrailingSlash(apiBaseUrl);
   const url = new URL(`ilink/bot/get_bot_qrcode?bot_type=${encodeURIComponent(botType)}`, base);
-  const response = await fetch(url.toString());
+  const startedAt = Date.now();
+  let response;
+  try {
+    response = await fetch(url.toString());
+  } catch (error) {
+    throw createWeixinNetworkError(error, {
+      operation: "loginQrCode",
+      phase: "request",
+      url: url.toString(),
+      elapsedMs: Date.now() - startedAt,
+    });
+  }
   if (!response.ok) {
     const body = await response.text().catch(() => "(unreadable)");
     throw new Error(`Failed to fetch QR code: ${response.status} ${response.statusText} ${redactSensitiveText(body)}`);
@@ -30,7 +42,12 @@ async function pollQrStatus(apiBaseUrl, qrcode) {
   const base = ensureTrailingSlash(apiBaseUrl);
   const url = new URL(`ilink/bot/get_qrcode_status?qrcode=${encodeURIComponent(qrcode)}`, base);
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), QR_LONG_POLL_TIMEOUT_MS);
+  const startedAt = Date.now();
+  let deadlineAborted = false;
+  const timer = setTimeout(() => {
+    deadlineAborted = true;
+    controller.abort();
+  }, QR_LONG_POLL_TIMEOUT_MS);
   try {
     const response = await fetch(url.toString(), {
       headers: {
@@ -46,10 +63,17 @@ async function pollQrStatus(apiBaseUrl, qrcode) {
     return JSON.parse(rawText);
   } catch (error) {
     clearTimeout(timer);
-    if (error instanceof Error && error.name === "AbortError") {
+    if (deadlineAborted && error instanceof Error && error.name === "AbortError") {
       return { status: "wait" };
     }
-    throw error;
+    throw createWeixinNetworkError(error, {
+      operation: "loginQrStatus",
+      phase: "request_or_body",
+      url: url.toString(),
+      timeoutMs: QR_LONG_POLL_TIMEOUT_MS,
+      elapsedMs: Date.now() - startedAt,
+      deadlineAborted,
+    });
   }
 }
 

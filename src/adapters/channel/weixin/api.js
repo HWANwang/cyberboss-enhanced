@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { redactSensitiveText } = require("./redact");
+const { createWeixinNetworkError } = require("./network-error");
 
 function readChannelVersion() {
   try {
@@ -71,16 +72,46 @@ async function apiPost({ baseUrl, endpoint, token, body, timeoutMs = 0, label })
   const url = new URL(endpoint, ensureTrailingSlash(baseUrl)).toString();
   const controller = new AbortController();
   const timeout = timeoutMs > 0 ? timeoutMs : DEFAULT_API_TIMEOUT_MS;
-  const timer = setTimeout(() => controller.abort(), timeout + 5_000);
+  const deadlineMs = timeout + 5_000;
+  const startedAt = Date.now();
+  let deadlineAborted = false;
+  const timer = setTimeout(() => {
+    deadlineAborted = true;
+    controller.abort();
+  }, deadlineMs);
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: buildHeaders(token, body),
-      body,
-      signal: controller.signal,
-    });
-    const raw = await response.text();
+    let response;
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers: buildHeaders(token, body),
+        body,
+        signal: controller.signal,
+      });
+    } catch (error) {
+      throw createWeixinNetworkError(error, {
+        operation: label,
+        phase: "request",
+        url,
+        timeoutMs: deadlineMs,
+        elapsedMs: Date.now() - startedAt,
+        deadlineAborted,
+      });
+    }
+    let raw;
+    try {
+      raw = await response.text();
+    } catch (error) {
+      throw createWeixinNetworkError(error, {
+        operation: label,
+        phase: "response_body",
+        url,
+        timeoutMs: deadlineMs,
+        elapsedMs: Date.now() - startedAt,
+        deadlineAborted,
+      });
+    }
     if (Buffer.byteLength(raw, "utf8") > MAX_RESPONSE_BODY_BYTES) {
       throw new Error(`${label} response body exceeds ${MAX_RESPONSE_BODY_BYTES} bytes`);
     }
@@ -222,7 +253,7 @@ async function getUpdates({ baseUrl, token, getUpdatesBuf = "", timeoutMs = DEFA
     });
     return parseJson(raw, "getUpdates");
   } catch (error) {
-    if (error instanceof Error && (error.name === "AbortError" || String(error.message || "").includes("aborted"))) {
+    if (error?.weixinDeadlineAborted) {
       return { ret: 0, msgs: [], get_updates_buf: getUpdatesBuf };
     }
     throw error;
